@@ -10,7 +10,6 @@ function WarholCard(props) {
             <div className="content">
 
 
-                {/* <strong>Name:</strong> {props.name} */}
             </div>
 
         </div>
