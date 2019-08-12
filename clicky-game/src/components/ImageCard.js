@@ -1,5 +1,5 @@
 import React from "react";
-// this is a stateless component
+// this is a stateless component    ra
 // state is a class
 const ImageCard = (props) => {
     return (
