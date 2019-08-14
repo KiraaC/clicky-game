@@ -1,52 +1,95 @@
-import Container from "../container/index.js";
-import Warhol from "../warhol.js";
-import React from "react"
+import React, { Component } from "react";
+import Nav from "../Nav";
+import Header from "../Header";
+import Container from "../Container";
+import ClickItem from "../ClickItem";
+import Footer from "../Footer";
+import data from "../../data.json";
 
-class Game extends React.Component {
+class Game extends Component {
     state = {
+        data,
         score: 0,
-        data: []
-    }
-    guessedIncorrectly = data => {
-        this.setState({
-            score: 0
-        })
-    }
-    guessedCorrectly = data => {
-        this.setState.score ({
-            score: ++ this.state.score
-        })
+        topScore: 0
+    };
+
+    componentDidMount() {
+        this.setState({ data: this.shuffleData(this.state.data) });
     }
 
-    handleClick = id => {
-        isGuessedCorrectly = false
-        newData = this.state.data.map(item => {
-            var newItem = { ...item }
-            if (newItem.id = id) {
+    handleCorrectGuess = newData => {
+        const { topScore, score } = this.state;
+        const newScore = score + 1;
+        const newTopScore = Math.max(newScore, topScore);
+
+        this.setState({
+            data: this.shuffleData(newData),
+            score: newScore,
+            topScore: newTopScore
+        });
+    };
+
+    handleIncorrectGuess = data => {
+        this.setState({
+            data: this.resetData(data),
+            score: 0
+        });
+    };
+
+    resetData = data => {
+        const resetData = data.map(item => ({ ...item, clicked: false }));
+        return this.shuffleData(resetData);
+    };
+
+    shuffleData = data => {
+        let i = data.length - 1;
+        while (i > 0) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = data[i];
+            data[i] = data[j];
+            data[j] = temp;
+            i--;
+        }
+        return data;
+    };
+
+    handleItemClick = id => {
+        let guessedCorrectly = false;
+        const newData = this.state.data.map(item => {
+            const newItem = { ...item };
+            if (newItem.id === id) {
                 if (!newItem.clicked) {
-                    newItem.clicked = true
-                    isGuessedCorrectly = true
+                    newItem.clicked = true;
+                    guessedCorrectly = true;
                 }
             }
+            return newItem;
+        });
+        guessedCorrectly
+            ? this.handleCorrectGuess(newData)
+            : this.handleIncorrectGuess(newData);
+    };
 
-            return newItem
-
-
-        })
-        isGuessedCorrectly ? this.guessedCorrectly(newData)
-                         : this.guessedIncorrectly(newData)
-    }
     render() {
         return (
             <div>
-                test
-                {this.state.data.map(item => (
-                    <Warhol
-                        id={item.id}
-                        handleClick={this.handleClick}
-                        img={item.url} />
-                ))}
+                <Nav score={this.state.score} topScore={this.state.topScore} />
+                <Header />
+                <Container>
+                    {this.state.data.map(item => (
+                        <ClickItem
+                            key={item.id}
+                            id={item.id}
+                            shake={!this.state.score && this.state.topScore}
+                            handleClick={this.handleItemClick}
+                            image={item.image}
+                        />
+                    ))}
+                </Container>
+                <Footer />
             </div>
-        )
+        );
     }
 }
+
+export default Game;
